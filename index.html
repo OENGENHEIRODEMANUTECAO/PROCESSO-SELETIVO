@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Processo Seletivo — Date</title>
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:linear-gradient(135deg,#ffedf5,#f3eaff 55%,#e8f4ff);
+    color:#25232a; display:flex; justify-content:center; padding:18px; color-scheme:light;
+    padding-top:max(18px,env(safe-area-inset-top)); padding-bottom:max(18px,env(safe-area-inset-bottom));
+  }
+  .app{
+    width:min(440px,100%); min-height:620px; background:rgba(255,255,255,.94);
+    border:1px solid rgba(255,255,255,.8); border-radius:28px; padding:26px;
+    box-shadow:0 20px 60px rgba(70,35,80,.18); position:relative; overflow:hidden; margin:auto;
+  }
+  .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+  .badge{font-size:12px;font-weight:800;letter-spacing:.08em;color:#8b3d69;background:#ffe5f1;padding:8px 11px;border-radius:999px}
+  .counter{font-size:12px;color:#777}
+  .screen{display:none;animation:in .35s ease}
+  .screen.active{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  h1{font-size:30px;line-height:1.08;margin:10px 0 14px}
+  h2{font-size:23px;line-height:1.15;margin:12px 0 18px}
+  p{line-height:1.55;color:#666}
+  .hero{font-size:64px;text-align:center;margin:8px 0 4px}
+  button,.option{
+    width:100%; border:0; border-radius:16px; padding:15px 16px; font-size:16px;
+    font-weight:750; cursor:pointer; transition:.18s; font-family:inherit;
+  }
+  button.primary{background:#df4d8b;color:white;box-shadow:0 8px 18px rgba(223,77,139,.25)}
+  button.primary:hover{transform:translateY(-2px)}
+  .option{background:#f7f5f8;color:#333;text-align:left;margin:10px 0;border:1px solid #eee}
+  .option:hover{background:#f1e7ed;transform:translateY(-1px)}
+  .choice.selected{background:#ffe2ee;border:2px solid #df4d8b}
+  .row{display:flex;gap:10px}
+  .row>*{flex:1}
+  .note{font-size:12px;color:#999;text-align:center;margin-top:14px}
+  .runaway-area{height:145px;position:relative;margin-top:8px}
+  #noBtn{position:absolute;width:120px;left:50%;top:70px;transform:translateX(-50%);background:#eee;color:#777;transition:left .25s,top .25s,font-size .25s,width .25s}
+  #taunt{min-height:22px;font-size:13px;color:#df4d8b;text-align:center;font-weight:700;margin-top:10px}
+  .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#25232a;color:#fff;padding:12px 18px;border-radius:14px;font-size:14px;z-index:10;max-width:90%;text-align:center}
+  input.free{width:100%;padding:14px;border-radius:14px;border:1px solid #ddd;font-size:16px;font-family:inherit;margin-bottom:12px}
+  button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #7b61ff;outline-offset:2px}
+  .cal-nav{display:flex;justify-content:space-between;align-items:center;margin:4px 0 10px}
+  .cal-nav span{font-weight:800;text-transform:capitalize;font-size:15px}
+  .cal-arrow{width:38px;height:38px;padding:0;border-radius:12px;background:#f7f5f8;color:#df4d8b;font-size:20px;font-weight:800}
+  .cal-arrow:disabled{opacity:.3;cursor:default}
+  .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+  .cal-weekdays span{text-align:center;font-size:11px;color:#999;font-weight:700}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px}
+  .cal-day{width:100%;aspect-ratio:1;padding:0;border-radius:10px;background:#f7f5f8;font-size:13px;font-weight:700;color:#333}
+  .cal-day.selected{background:#df4d8b;color:#fff}
+  .cal-disabled{background:transparent;color:#ddd;cursor:default}
+  .cal-grid span{aspect-ratio:1}
+  select{
+    width:100%;padding:14px;border-radius:14px;border:1px solid #ddd;background:white;font-size:16px;margin-bottom:12px
+  }
+  .summary{background:#fff6fa;border-radius:18px;padding:16px;margin:15px 0}
+  .summary div{padding:7px 0;border-bottom:1px solid #f0dce5;font-size:14px}
+  .summary div:last-child{border:0}
+  .small{font-size:13px;color:#888}
+  .success{font-size:55px;text-align:center}
+  .confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .confetti i{position:absolute;width:8px;height:15px;animation:fall 2.2s linear infinite}
+  @keyframes fall{from{transform:translateY(-30px) rotate(0)}to{transform:translateY(700px) rotate(540deg)}}
+  .footer{font-size:11px;color:#aaa;text-align:center;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <span class="badge">PROCESSO SELETIVO 2026</span>
+    <span class="counter" id="counter">1 / 7</span>
+  </div>
+
+  <section class="screen active" id="s1">
+    <div class="hero">📋</div>
+    <h1>Você foi selecionada.</h1>
+    <p>Depois de uma análise extremamente criteriosa do seu currículo, chegamos a uma conclusão:</p>
+    <div class="summary">
+      <b>Você atende aos requisitos para participar de um possível date.</b>
+      <div>Experiência em conversar: ☑️</div>
+      <div>Senso de humor: aparentemente ☑️</div>
+      <div>Sorriso que desarma o candidato: ☑️☑️☑️</div>
+      <div>Disponibilidade para um rolê: a confirmar 👀</div>
+    </div>
+    <button class="primary" onclick="next()">Iniciar entrevista →</button>
+    <div class="footer">*O RH não autorizou a divulgação dos critérios. O candidato (eu) está nervoso, mas disfarçando.</div>
+  </section>
+
+  <section class="screen" id="s2">
+    <h2>Pergunta eliminatória nº 1</h2>
+    <p>Existe uma vaga aberta para um <b>date comigo</b>. Benefícios: boa companhia, risadas garantidas e eu pago o primeiro café. Você tem interesse?</p>
+    <button class="primary" onclick="answer('sim')">SIM, quero saber onde isso vai dar 😌</button>
+    <div class="runaway-area" id="runArea">
+      <button id="noBtn" onmouseenter="runNo()" ontouchstart="runNo(event)" onclick="runNo(event)">NÃO 😶</button>
+    </div>
+    <div id="taunt"></div>
+  </section>
+
+  <section class="screen" id="s3">
+    <h2>Excelente. Agora precisamos alinhar a logística.</h2>
+    <p>Qual tipo de rolê combina mais com você?</p>
+    <div id="vibes">
+      <button class="option choice" onclick="pick(this,'Vibe','☕ Café + conversa sem pressa')">☕ Café + conversa sem pressa</button>
+      <button class="option choice" onclick="pick(this,'Vibe','🍝 Jantar + papo + risadas')">🍝 Jantar + papo + risadas</button>
+      <button class="option choice" onclick="pick(this,'Vibe','🎢 Algo diferente/aventura')">🎢 Algo diferente/aventura</button>
+      <button class="option choice" onclick="pick(this,'Vibe','🎲 Você escolhe e eu descubro na hora')">🎲 Você escolhe e eu descubro na hora</button>
+    </div>
+    <button class="primary" onclick="next()">Próximo →</button>
+  </section>
+
+  <section class="screen" id="s4">
+    <h2>Escolha a data do evento</h2>
+    <p>Navegue pelos meses e escolhe o dia que ficar melhor pra você. 😌</p>
+    <div class="cal-nav">
+      <button type="button" class="cal-arrow" id="calPrev" onclick="calMove(-1)" aria-label="Mês anterior">‹</button>
+      <span id="calLabel"></span>
+      <button type="button" class="cal-arrow" id="calNext" onclick="calMove(1)" aria-label="Próximo mês">›</button>
+    </div>
+    <div class="cal-weekdays" id="calWeekdays"></div>
+    <div class="cal-grid" id="calGrid"></div>
+    <button class="primary" onclick="next()">Continuar →</button>
+  </section>
+
+  <section class="screen" id="s5">
+    <h2>Horário do compromisso</h2>
+    <p>Qual horário você prefere?</p>
+    <div id="times">
+      <button class="option choice" onclick="pick(this,'Horário','18:30')">18:30 — horário de quem se organiza</button>
+      <button class="option choice" onclick="pick(this,'Horário','19:30')">19:30 — clássico</button>
+      <button class="option choice" onclick="pick(this,'Horário','20:30')">20:30 — já chegamos no modo noite</button>
+      <button class="option choice" onclick="pick(this,'Horário','A combinar')">Outro — vamos negociar 👀</button>
+    </div>
+    <button class="primary" onclick="next()">Continuar →</button>
+  </section>
+
+  <section class="screen" id="s6">
+    <h2>Últimas perguntas do RH</h2>
+    <p>Qual é o nível de produção esperado?</p>
+    <div id="dress">
+      <button class="option choice" onclick="pick(this,'Dress code','Casual, sem pressão')">👕 Casual, sem pressão</button>
+      <button class="option choice" onclick="pick(this,'Dress code','Arrumada, mas fingindo naturalidade')">✨ Arrumada, mas fingindo naturalidade</button>
+      <button class="option choice" onclick="pick(this,'Dress code','Vou bonita e pronto')">💅 Vou bonita e pronto</button>
+      <button class="option choice" onclick="pick(this,'Dress code','A decisão fica para o dia')">🤷 A decisão fica para o dia</button>
+    </div>
+    <p style="margin-top:6px">Algo que o RH precisa saber? (alergia, fobia, ex-namorado perigoso...)</p>
+    <input class="free" id="extra" placeholder="Opcional, mas o RH adora ler 👀" maxlength="120">
+    <button class="primary" onclick="finish()">Finalizar candidatura 💌</button>
+  </section>
+
+  <section class="screen" id="s7">
+    <div class="confetti" id="confetti"></div>
+    <div class="success">🎉</div>
+    <h1>Parabéns!</h1>
+    <p>Após uma avaliação rigorosíssima, sua candidatura foi <b>aprovada</b>. Suas respostas já foram encaminhadas. 💌</p>
+    <div class="summary" id="result"></div>
+    <button class="primary" onclick="confirmSend()">Confirmar e enviar 💬</button>
+    <button class="option" style="text-align:center" onclick="reviewAgain()">Revisar respostas ✏️</button>
+    <div id="fallback"></div>
+  </section>
+</div>
+
+<script>
+let current=1;
+let data={};
+
+function show(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+  current=n;
+  document.getElementById('counter').textContent=n+' / 7';
+}
+function toast(msg){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.body.appendChild(t);setTimeout(()=>t.remove(),2200);
+}
+function next(){
+  if(current===3 && !data.Vibe){toast('A banca precisa de uma resposta antes de continuar 😌');return}
+  if(current===4 && !data.Data){toast('Escolha uma data primeiro 👀');return}
+  if(current===5 && !data.Horário){toast('Escolha um horário primeiro. O RH agradece.');return}
+  show(current+1);
+}
+function answer(x){data.Interesse='SIM';show(3)}
+function pick(el,key,value){
+  data[key]=value;
+  el.parentElement.querySelectorAll('.choice').forEach(x=>x.classList.remove('selected'));
+  el.classList.add('selected');
+}
+let noTries=0;
+const taunts=['Ué, o botão fugiu 🤔','Tenta de novo, quem sabe 😏','Ele tá com medo de você 😂','Isso aqui não é democracia, é RH 📋','Última chance de clicar... e ele desistiu 🙃','Ok, o botão pediu demissão 💼','Já deu, clica no SIM 😌'];
+function runNo(e){
+  if(e&&e.preventDefault)e.preventDefault();
+  noTries++;
+  const tt=document.getElementById('taunt');
+  tt.textContent=taunts[Math.min(noTries-1,taunts.length-1)];
+  const btn=document.getElementById('noBtn');
+  if(noTries>3){btn.style.width=Math.max(50,120-(noTries-3)*14)+'px';btn.style.fontSize=Math.max(9,16-(noTries-3)*1.5)+'px'}
+  const area=document.getElementById('runArea');
+  const maxX=Math.max(0,area.clientWidth-btn.offsetWidth);
+  const maxY=Math.max(0,area.clientHeight-btn.offsetHeight);
+  btn.style.left=(Math.random()*maxX+btn.offsetWidth/2)+'px';
+  btn.style.top=(Math.random()*maxY)+'px';
+  btn.style.transform='translateX(-50%)';
+}
+const calToday=new Date(); calToday.setHours(0,0,0,0);
+const calMax=new Date(calToday); calMax.setFullYear(calMax.getFullYear()+1);
+let calView=new Date(calToday.getFullYear(),calToday.getMonth(),1);
+let calSelected=null;
+function renderCalendar(){
+  document.getElementById('calLabel').textContent=calView.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const wd=document.getElementById('calWeekdays');
+  if(!wd.childElementCount){['D','S','T','Q','Q','S','S'].forEach(w=>{const sp=document.createElement('span');sp.textContent=w;wd.appendChild(sp)})}
+  const grid=document.getElementById('calGrid');
+  grid.innerHTML='';
+  const year=calView.getFullYear(), month=calView.getMonth();
+  const firstDay=new Date(year,month,1).getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  for(let i=0;i<firstDay;i++){grid.appendChild(document.createElement('span'))}
+  for(let d=1;d<=daysInMonth;d++){
+    const cellDate=new Date(year,month,d);
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.textContent=d;
+    const isPast=cellDate<calToday, isFuture=cellDate>calMax;
+    if(isPast||isFuture){
+      btn.className='cal-day cal-disabled'; btn.disabled=true;
+    }else{
+      btn.className='cal-day';
+      if(calSelected && cellDate.getTime()===calSelected.getTime())btn.classList.add('selected');
+      btn.onclick=()=>{
+        calSelected=cellDate;
+        data.Data=cellDate.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'}).replace('.','');
+        grid.querySelectorAll('.cal-day.selected').forEach(x=>x.classList.remove('selected'));
+        btn.classList.add('selected');
+      };
+    }
+    grid.appendChild(btn);
+  }
+  const minMonth=new Date(calToday.getFullYear(),calToday.getMonth(),1);
+  const maxMonth=new Date(calMax.getFullYear(),calMax.getMonth(),1);
+  document.getElementById('calPrev').disabled = calView<=minMonth;
+  document.getElementById('calNext').disabled = calView>=maxMonth;
+}
+function calMove(dir){
+  const nd=new Date(calView); nd.setMonth(nd.getMonth()+dir);
+  const minMonth=new Date(calToday.getFullYear(),calToday.getMonth(),1);
+  const maxMonth=new Date(calMax.getFullYear(),calMax.getMonth(),1);
+  if(nd<minMonth||nd>maxMonth) return;
+  calView=nd; renderCalendar();
+}
+function esc(t){return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function finish(){
+  if(!data['Dress code']){toast('Falta responder o dress code 😎');return}
+  data.Extra=document.getElementById('extra').value.trim();
+  let html='<div><b>📅 Data:</b> '+data.Data+'</div>'+
+           '<div><b>🕐 Horário:</b> '+data.Horário+'</div>'+
+           '<div><b>✨ Vibe:</b> '+data.Vibe+'</div>'+
+           '<div><b>👗 Dress code:</b> '+data['Dress code']+'</div>'+
+           (data.Extra?'<div><b>📝 Observação:</b> '+esc(data.Extra)+'</div>':'');
+  document.getElementById('result').innerHTML=html;
+  document.getElementById('fallback').innerHTML='';
+  show(7); confetti();
+}
+function confirmSend(){
+  sendWhatsApp();
+  sent=true;
+}
+function reviewAgain(){
+  show(3);
+}
+function confetti(){
+  const c=document.getElementById('confetti');
+  for(let i=0;i<35;i++){
+    const e=document.createElement('i');
+    e.style.left=Math.random()*100+'%';
+    e.style.top=(-Math.random()*30)+'px';
+    e.style.animationDelay=Math.random()*1.5+'s';
+    e.style.background=['#df4d8b','#7b61ff','#f5b942','#55b88a'][i%4];
+    c.appendChild(e);
+  }
+}
+// COLOQUE SEU NÚMERO AQUI com DDI+DDD, só dígitos. Ex.: 5519999999999
+const PHONE='5511999319751';
+let sent=false;
+function buildMsg(){
+  const header = sent
+    ? '🔄 Atualizei minhas respostas do processo seletivo! Segue a versão nova:'
+    : 'Oi! Fui aprovada no processo seletivo do date 😂';
+  return header+'\n\n'+
+    '📅 Data: '+data.Data+'\n'+
+    '🕐 Horário: '+data.Horário+'\n'+
+    '✨ Vibe: '+data.Vibe+'\n'+
+    '👗 Dress code: '+data['Dress code']+'\n'+
+    (data.Extra?'📝 Observação: '+data.Extra+'\n':'')+
+    '\nAguardo instruções para a próxima etapa 😌';
+}
+function copyMsg(){
+  const msg=buildMsg();
+  const done=()=>toast('Mensagem copiada! Cole no WhatsApp 💬');
+  const fallback=()=>{
+    const ta=document.createElement('textarea');ta.value=msg;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');done()}catch(e){toast('Não consegui copiar. Segure e copie o texto acima.')}
+    ta.remove();
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(msg).then(done,fallback)}else{fallback()}
+}
+function sendWhatsApp(){
+  const msg=buildMsg();
+  const url='https://wa.me/'+PHONE+'?text='+encodeURIComponent(msg);
+  let opened=null;
+  try{opened=window.open(url,'_blank','noopener')}catch(e){}
+  if(!opened){try{window.top.location.href=url}catch(e){}}
+  const box=document.getElementById('fallback');
+  box.innerHTML='<p class="small">Se o WhatsApp não abriu sozinho:</p>'+
+    '<a class="option" style="display:block;text-align:center;text-decoration:none;background:#25d366;color:#fff" href="'+url+'" target="_blank" rel="noopener">Abrir o WhatsApp 💬</a>'+
+    '<button class="option" style="text-align:center" onclick="copyMsg()">Copiar a mensagem 📋</button>';
+}
+renderCalendar();
+</script>
+</body>
+</html>
